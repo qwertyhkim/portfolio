@@ -9,7 +9,7 @@ export const profile = {
   role: "Digital Analyst", // used in the browser tab title
   headline: "I look for the why behind the numbers.", // *word* = italic
   intro:
-    "I'm a digital analyst with 3.5 years on the agency side, helping shape digital strategy for LG Electronics and LG Display and measuring what worked through campaign tracking, A/B tests, and budget analysis. In the University of Minnesota MSBA program, I added causal inference, machine learning, and forecasting, applied to real client problems through the Carlson Analytics Lab.",
+    "I'm Yonghui Kim, a digital analyst with 3.5 years on the agency side, helping shape digital strategy for LG Electronics and LG Display and measuring what worked through campaign tracking, A/B tests, and budget analysis. In the University of Minnesota MSBA program, I added causal inference, machine learning, and forecasting, applied to real client problems through the Carlson Analytics Lab.",
   email: "yhkimwk@gmail.com",
   linkedin: "https://www.linkedin.com/in/yonghuikim",
   github: "", // e.g. "https://github.com/yourname" (hidden while empty)
