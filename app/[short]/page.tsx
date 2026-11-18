@@ -11,7 +11,23 @@ export function generateStaticParams() {
   return shortLinks.map((l) => ({ short: l.slug }));
 }
 
-export const metadata: Metadata = { robots: { index: false } };
+// Point the canonical and preview URL at the short link itself, so LinkedIn
+// links to /<slug> (which forwards with UTM tags) instead of the bare home page.
+export async function generateMetadata({ params }: { params: Promise<{ short: string }> }): Promise<Metadata> {
+  const { short } = await params;
+  const url = `/${short}`;
+  return {
+    robots: { index: false },
+    alternates: { canonical: url },
+    openGraph: {
+      title: "Yonghui Kim",
+      description: "I look for the why behind the numbers.",
+      type: "website",
+      url,
+      images: [{ url: "/og.png", width: 1200, height: 627, alt: "Yonghui Kim, Digital Analyst" }],
+    },
+  };
+}
 
 export default async function ShortLink({ params }: { params: Promise<{ short: string }> }) {
   const { short } = await params;
