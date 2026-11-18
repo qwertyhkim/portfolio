@@ -1,4 +1,4 @@
-# Yonghui Kim â€” Portfolio
+# Yonghui Kim | Portfolio
 
 Personal portfolio site for Yonghui Kim, digital analyst (University of Minnesota MSBA).
 
@@ -7,7 +7,7 @@ Built with **Next.js 15 (App Router)**, **React 19**, and **TypeScript**, deploy
 ## Features
 - Client consulting and selected analytics projects, each with a detail page (context, approach, results)
 - Canvas hero animation: scattered points gather into an upward trend (`public/hero-motion.js`)
-- Custom event tracking through Google Tag Manager â†’ GA4 â†’ BigQuery
+- Custom event tracking through Google Tag Manager --> GA4 --> BigQuery
 
 ## Project structure
 | Path | Purpose |
