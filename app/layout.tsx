@@ -7,6 +7,7 @@ import { GTMScript, GTMNoScript } from "@/components/GTM";
 import { profile } from "@/lib/content";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://yonghui-kim.vercel.app"),
   title: `${profile.name} | ${profile.role}`,
   description: profile.intro,
   // Link previews (iMessage, LinkedIn, Slack) read these tags
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
     title: profile.name,
     description: profile.headline.replace(/\*/g, ""),
     type: "website",
+    url: "/",
+    images: [{ url: "/og.png", width: 1200, height: 627, alt: "Yonghui Kim, Digital Analyst" }],
   },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
