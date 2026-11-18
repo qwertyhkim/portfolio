@@ -16,8 +16,15 @@ declare global {
   }
 }
 
+// GTM's dataLayer remembers values from earlier pushes, so every event
+// first resets all parameters. Otherwise contact_click could carry the
+// project_name of a project opened earlier.
+const PARAM_KEYS = ["project_name", "location", "link_type", "channel", "section_name"];
+
 export function track(event: string, params: Params = {}) {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ event, ...params });
+  const reset: Params = {};
+  PARAM_KEYS.forEach((k) => (reset[k] = undefined));
+  window.dataLayer.push({ event, ...reset, ...params });
 }
