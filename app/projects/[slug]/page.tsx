@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import ProjectChartView from "@/components/ProjectChartView";
 import ProjectLinks from "@/components/ProjectLinks";
 import { projects, profile } from "@/lib/content";
 
@@ -81,6 +82,8 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
             </ul>
           )}
         </section>
+
+        {p.charts?.map((c) => <ProjectChartView key={c.heading} chart={c} />)}
 
         <section className="detail-block">
           <h2>Results</h2>
