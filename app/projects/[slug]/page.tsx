@@ -43,14 +43,16 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
         <p className="detail-summary">{p.summary}</p>
         {p.role && <p className="muted">{p.role}</p>}
 
-        <div className="metric-row">
-          {(p.metrics ?? [p.metric]).map((m) => (
-            <div key={m.value} className="metric metric-lg">
-              <span className="metric-value">{m.value}</span>
-              <span className="metric-label">{m.label}</span>
-            </div>
-          ))}
-        </div>
+        {(p.metrics ?? (p.metric ? [p.metric] : [])).length > 0 && (
+          <div className="metric-row">
+            {(p.metrics ?? (p.metric ? [p.metric] : [])).map((m) => (
+              <div key={m.value} className="metric metric-lg">
+                <span className="metric-value">{m.value}</span>
+                <span className="metric-label">{m.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <ProjectLinks p={p} large />
 
