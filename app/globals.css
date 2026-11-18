@@ -95,7 +95,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -18px rgba(0,0,0,.25); border-color: var(--accent); }
 .card-soon { background: transparent; border-style: dashed; }
 .card-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.badge { font-size: 12px; font-weight: 600; color: #c4361f; background: #fbe5e0; padding: 3px 10px; border-radius: 999px; }
+.badge { font-size: 12px; font-weight: 600; color: #c4361f; background: #fbe5e0; padding: 4px 10px; border-radius: 6px; display: inline-block; line-height: 1.45; }
 .badge-soon { color: var(--accent-ink); background: var(--accent-soft); }
 .metric { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 4px; }
 .metric-value { font-size: 34px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
