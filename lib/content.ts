@@ -42,7 +42,7 @@ export type Project = {
   category: string;
   award?: string;
   role?: string;
-  metric: { value: string; label: string }; // shown on the card
+  metric?: { value: string; label: string }; // shown on the card (omit to show the summary instead)
   metrics?: { value: string; label: string }[]; // optional: several numbers on the detail page
   summary: string;
   tags: string[];
@@ -64,11 +64,6 @@ export const projects: Project[] = [
     group: "consulting",
     category: "Causal Inference · Segmentation",
     role: "Project Lead · Client: A higher education institution",
-    metric: { value: "$7.9M", label: "expansion opportunity identified" },
-    metrics: [
-      { value: "6", label: "segments with significant GPA gains" },
-      { value: "$7.9M", label: "expansion opportunity identified" },
-    ],
     summary:
       "Measured whether a course-materials subscription program improves student outcomes, and where it should grow next.",
     tags: ["Python", "Tableau", "Causal Inference", "Segmentation"],
@@ -79,11 +74,11 @@ export const projects: Project[] = [
       { title: "Build the data", text: "Joined course-material transactions with academic records, flagging material use with two independent rules" },
       { title: "Remove selection bias", text: "Self-selection skewed raw comparisons, so participants were matched to look-alike non-participants (CEM)" },
       { title: "Measure impact", text: "Estimated GPA and completion effects with difference-in-differences, then tested where effects concentrate" },
-      { title: "Find growth", text: "Mapped 186 course subjects in Tableau on a coverage-vs.-adoption matrix" },
+      { title: "Find growth", text: "Mapped course subjects in Tableau on a coverage-vs.-adoption matrix" },
     ],
     results: [
-      "Confirmed significant GPA gains in 6 segments, giving senior stakeholders evidence to support continued investment",
-      "Flagged high-adoption, low-coverage subjects as expansion priorities worth up to $7.9M in incremental revenue",
+      "Found GPA gains concentrated in specific student segments, giving senior stakeholders evidence to support continued investment",
+      "Flagged high-adoption, low-coverage subjects as the program's next expansion priorities",
       "Delivered interactive Tableau dashboards for the client team's ongoing monitoring",
     ],
     links: {},
@@ -128,11 +123,6 @@ export const projects: Project[] = [
     category: "Pricing · Business Intelligence",
     award: "Finalist, Top 6 Teams",
     role: "Client: A regional road construction contractor",
-    metric: { value: "$63M", label: "revenue opportunity sized" },
-    metrics: [
-      { value: "11% → 4.5%", label: "winner–runner-up bid gap as rivals rise from 2 to 6+" },
-      { value: "$63M", label: "revenue opportunity sized" },
-    ],
     summary:
       "Found where a regional road construction contractor leaves money on the table in competitive bids, and which rivals to watch.",
     tags: ["SQL", "Tableau", "Pricing Analytics", "Competitive Intelligence"],
@@ -140,14 +130,14 @@ export const projects: Project[] = [
       "The client bids on public road construction projects against a handful of regional rivals. The goal was to win more contracts at a reasonable price, without bidding aggressively low, using two years of historical bid records.",
     approach: [],
     steps: [
-      { title: "Clean the bid data", text: "Merged duplicate competitor names and re-sorted bids to build a reliable record of 1.6K regional auctions" },
+      { title: "Clean the bid data", text: "Merged duplicate competitor names and re-sorted bids to build a reliable record of regional auctions" },
       { title: "Measure the price gaps", text: "Compared winning and runner-up bids on every project, split by season and number of bidders" },
       { title: "Score competitor threats", text: "Built a threat score from how often each rival bids on the same projects and how often it underbids" },
       { title: "Build the dashboard", text: "Shipped a 5-panel interactive Tableau dashboard to benchmark against rivals by region and season" },
     ],
     results: [
-      "Found 13 peak-season losses within 2.5% of the winning price, sizing a $63M opportunity from a targeted price adjustment",
-      "Quantified $30M left on the table across 98 wins, with gaps narrowing from 11% to 4.5% as bidders rise from 2 to 6+, supporting competition-based markups",
+      "Found peak-season losses decided by narrow price margins, sizing the revenue opportunity from a targeted price adjustment",
+      "Quantified money left on the table in past wins and showed the winning margin narrows as more bidders compete, supporting competition-based markups",
       "Gave the client an ongoing view of its biggest competitive threats through the dashboard",
     ],
     links: {},
@@ -159,26 +149,21 @@ export const projects: Project[] = [
     group: "consulting",
     category: "Anomaly Detection · Operations",
     role: "Client: A K-12 student transportation management firm",
-    metric: { value: "3 of 16", label: "vendors drove 50%+ of route anomalies" },
-    metrics: [
-      { value: "7.1 pts", label: "of inflated stop completion removed from raw GPS data" },
-      { value: "3 of 16", label: "vendors drove 50%+ of route anomalies" },
-    ],
     summary:
       "Separated GPS hardware failures from driver behavior so a school transportation provider can hold its bus vendors accountable.",
     tags: ["Python", "Anomaly Detection", "Operations Analytics"],
     context:
-      "The client manages student transportation on behalf of schools, relying on GPS data from 16 bus vendors, each with its own hardware and polling standards. Raw GPS feeds blend device failures with driver behavior, so when a route underperforms, it is unclear whether to fix the device or the driver.",
+      "The client manages student transportation on behalf of schools, relying on GPS data from multiple bus vendors, each with its own hardware and polling standards. Raw GPS feeds blend device failures with driver behavior, so when a route underperforms, it is unclear whether to fix the device or the driver.",
     approach: [],
     steps: [
       { title: "Score GPS health", text: "Scored device health with Isolation Forest on 4 engineered signal features, normalized within each GPS provider" },
       { title: "Isolate real service time", text: "Limited analysis to an active window from the first to the last planned stop, stripping depot pings" },
       { title: "Detect route anomalies", text: "Learned each route's corridor with DBSCAN and classified anomalies into 6 types with rule-based thresholds" },
-      { title: "Segment vendors", text: "Mapped 16 vendors on a GPS health × route execution matrix into 4 risk segments" },
+      { title: "Segment vendors", text: "Mapped vendors on a GPS health × route execution matrix into 4 risk segments" },
     ],
     results: [
-      "Showed raw GPS data overstated stop completion by 7.1 points, resetting the client's performance baseline",
-      "Found 3 of 16 vendors generated over 50% of anomalies, mostly behavioral detours rather than hardware faults",
+      "Showed raw GPS data overstated stop completion, resetting the client's performance baseline",
+      "Found a small group of vendors generated most anomalies, mostly behavioral detours rather than hardware faults",
       "Assigned tiered corrective actions and a contract rule requiring remediation plans from vendors breaching a signal-loss threshold",
     ],
     links: {},
