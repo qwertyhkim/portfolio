@@ -13,13 +13,13 @@ export default function ProjectCard({ p }: { p: Project }) {
 
       <h3 className="card-title">{p.cardTitle ?? p.title}</h3>
 
-      {!p.comingSoon && (
+      {!p.comingSoon && p.metric && (
         <div className="metric">
           <span className="metric-value">{p.metric.value}</span>
           <span className="metric-label">{p.metric.label}</span>
         </div>
       )}
-      {p.comingSoon && <p className="card-summary">{p.summary}</p>}
+      {(p.comingSoon || !p.metric) && <p className="card-summary">{p.summary}</p>}
       {p.award && (
         <div className="card-top">
           <span className="badge">{p.award}</span>
