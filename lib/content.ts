@@ -34,6 +34,76 @@ export type ProjectLinks = {
   tableau?: string;
 };
 
+export type ChartAxis = { label: string; low: string; high: string };
+export type ProjectChart =
+  | {
+      kind: "matrix"; // 2x2 framework, no data points
+      heading: string;
+      caption: string;
+      x: ChartAxis;
+      y: ChartAxis;
+      // order: top-left, top-right, bottom-left, bottom-right
+      quadrants: { title: string; text: string; highlight?: boolean }[];
+    }
+  | {
+      kind: "bars"; // horizontal bars around a baseline (e.g. odds ratio = 1)
+      heading: string;
+      caption: string;
+      baseline: number;
+      min: number;
+      max: number;
+      axisLabel: string;
+      step?: number; // tick spacing, default 0.2
+      decimals?: number; // value labels, default 2
+      rows: { label: string; value: number; highlight?: boolean }[]; // if any row is highlighted, only those are colored
+    }
+  | {
+      kind: "slope"; // before/after for two groups (Difference-in-Differences)
+      heading: string;
+      caption: string;
+      before: string;
+      after: string;
+      yLabel: string;
+      groups: { label: string; before: number; after: number; highlight?: boolean }[];
+      note: string;
+    }
+  | {
+      kind: "forecast"; // history + holdout actuals vs forecast with a prediction band
+      heading: string;
+      caption: string;
+      yLabel: string;
+      scale: number; // divide values by this for axis labels
+      history: { date: string; value: number }[];
+      holdout: { date: string; actual: number; fc: number; lo: number; hi: number }[];
+    }
+  | {
+      kind: "process"; // before/after process lanes
+      heading: string;
+      caption: string;
+      lanes: { label: string; steps: string[]; highlight?: boolean }[];
+    }
+  | {
+      kind: "corridor"; // schematic route map: learned corridor + anomaly types, no data
+      heading: string;
+      caption: string;
+      notes: { title: string; text: string }[]; // numbered 1-3 on the map
+    }
+  | {
+      kind: "flow"; // method pipeline with small illustrations, no data
+      heading: string;
+      caption: string;
+      steps: { tag: string; title: string; text: string; icon: "match" | "did" | "sig" }[];
+    }
+  | {
+      kind: "curve"; // conceptual trend, no numbers on the axes
+      heading: string;
+      caption: string;
+      x: ChartAxis;
+      y: string;
+      start: { title: string; text: string };
+      end: { title: string; text: string };
+    };
+
 export type Project = {
   slug: string;
   title: string; // full title (detail page)
@@ -50,6 +120,7 @@ export type Project = {
   approach: string[];
   steps?: { title: string; text: string }[]; // shown as boxes instead of approach bullets
   images?: { src: string; caption: string }[]; // screenshots shown under Results (files in /public)
+  charts?: ProjectChart[]; // visuals shown between Approach and Results
   results: string[];
   links: ProjectLinks;
   confidential?: boolean;
@@ -72,9 +143,34 @@ export const projects: Project[] = [
     approach: [],
     steps: [
       { title: "Build the data", text: "Joined course-material transactions with academic records, flagging material use with two independent rules" },
-      { title: "Remove selection bias", text: "Self-selection skewed raw comparisons, so participants were matched to look-alike non-participants (CEM)" },
-      { title: "Measure impact", text: "Estimated GPA and completion effects with difference-in-differences, then tested where effects concentrate" },
+      { title: "Remove selection bias", text: "Self-selection skewed raw comparisons, so participants were matched to look-alike non-participants with Coarsened Exact Matching" },
+      { title: "Measure impact", text: "Estimated GPA and completion effects with Difference-in-Differences, then tested where effects concentrate" },
       { title: "Find growth", text: "Mapped course subjects in Tableau on a coverage-vs.-adoption matrix" },
+    ],
+    charts: [
+      {
+        kind: "flow",
+        heading: "Research Design",
+        caption: "A quasi-experimental design, used because students chose whether to join the program. Conceptual view; client data not shown.",
+        steps: [
+          { tag: "01 Match", title: "Coarsened Exact Matching", text: "Pair each participant with similar non-participants so the comparison is like-for-like, controlling for self-selection bias", icon: "match" },
+          { tag: "02 Compare", title: "Difference-in-Differences", text: "Compare the change in outcomes before and after joining, net of trends both groups share", icon: "did" },
+          { tag: "03 Test", title: "Statistical Significance", text: "Keep only effects whose confidence interval excludes zero, then locate the segments where they concentrate", icon: "sig" },
+        ],
+      },
+      {
+        kind: "matrix",
+        heading: "Growth Framework",
+        caption: "Each course subject is placed by how widely the program is offered and how often students opt in. Conceptual view; client data not shown.",
+        x: { label: "Program Availability", low: "Few Classes", high: "Most Classes" },
+        y: { label: "Student Participation", low: "Low", high: "High" },
+        quadrants: [
+          { title: "Expansion Priority", text: "Students opt in when offered, but few classes offer it", highlight: true },
+          { title: "Core Strength", text: "Widely offered and widely used" },
+          { title: "Low Priority", text: "Limited reach and limited demand" },
+          { title: "Adoption Gap", text: "Widely offered, but students rarely opt in" },
+        ],
+      },
     ],
     results: [
       "Found GPA gains concentrated in specific student segments, giving senior stakeholders evidence to support continued investment",
@@ -103,10 +199,33 @@ export const projects: Project[] = [
       "Many high school equivalency candidates never finish the credential, and study resources vary widely by region. The client wanted to know which preparation behaviors drive success and where regional support would matter most.",
     approach: [],
     steps: [
-      { title: "Find what drives passing", text: "Screened prep methods by correlation, then modeled them together with logistic regression across 304K+ candidates" },
+      { title: "Find what drives passing", text: "Screened prep methods by correlation, then modeled them together with Logistic Regression across 304K+ candidates" },
       { title: "Build a prep score KPI", text: "Turned 10 prep-method coefficients into one weighted score that predicts a candidate's likelihood of success" },
       { title: "Segment candidates", text: "Clustered candidates by prep behavior and demographics into 4 behavioral archetypes (K-Means)" },
       { title: "Map regional gaps", text: "Mapped segments by county and paired the results with state policy research to diagnose root causes" },
+    ],
+    charts: [
+      {
+        kind: "bars",
+        heading: "Exam Success Drivers",
+        caption: "Odds ratios from one Logistic Regression with all prep methods modeled together. Above 1.0 means higher odds of earning the credential.",
+        baseline: 1,
+        min: 0.5,
+        max: 1.5,
+        axisLabel: "Odds Ratio",
+        rows: [
+          { label: "Official Practice Tests", value: 1.34 },
+          { label: "Online Course / Video", value: 1.22 },
+          { label: "Books / Print", value: 1.12 },
+          { label: "Other", value: 1.08 },
+          { label: "Social Networking", value: 0.96 },
+          { label: "Audio Materials", value: 0.93 },
+          { label: "Test Prep Center", value: 0.92 },
+          { label: "Adult Ed Teacher", value: 0.88 },
+          { label: "Adult Ed Class", value: 0.83 },
+          { label: "TV Study Program", value: 0.7 },
+        ],
+      },
     ],
     results: [
       "Identified official practice testing as the strongest predictor of passing, with 34% higher odds",
@@ -135,6 +254,17 @@ export const projects: Project[] = [
       { title: "Score competitor threats", text: "Built a threat score from how often each rival bids on the same projects and how often it underbids" },
       { title: "Build the dashboard", text: "Shipped a 5-panel interactive Tableau dashboard to benchmark against rivals by region and season" },
     ],
+    charts: [
+      {
+        kind: "curve",
+        heading: "Bid Pricing Pattern",
+        caption: "The winning margin narrows as more contractors bid, so the markup should follow the expected competition. Conceptual illustration, not to scale; client data not shown.",
+        x: { label: "Number of Bidders", low: "Few", high: "Many" },
+        y: "Gap Between Winning and Runner-Up Bid",
+        start: { title: "Few Rivals", text: "Wide gap: room to raise the bid" },
+        end: { title: "Many Rivals", text: "Narrow gap: price precisely" },
+      },
+    ],
     results: [
       "Found peak-season losses decided by narrow price margins, sizing the revenue opportunity from a targeted price adjustment",
       "Quantified money left on the table in past wins and showed the winning margin narrows as more bidders compete, supporting competition-based markups",
@@ -160,6 +290,31 @@ export const projects: Project[] = [
       { title: "Isolate real service time", text: "Limited analysis to an active window from the first to the last planned stop, stripping depot pings" },
       { title: "Detect route anomalies", text: "Learned each route's corridor with DBSCAN and classified anomalies into 6 types with rule-based thresholds" },
       { title: "Segment vendors", text: "Mapped vendors on a GPS health × route execution matrix into 4 risk segments" },
+    ],
+    charts: [
+      {
+        kind: "corridor",
+        heading: "Route Anomaly Detection",
+        caption: "DBSCAN learns each route's normal corridor from historical trips, run separately for morning and afternoon runs. Pings outside expected bounds are then classified by rule. Conceptual view; route data not shown.",
+        notes: [
+          { title: "Detour", text: "Pings drift more than 150 m from the learned corridor (driver behavior)" },
+          { title: "GPS Jump", text: "A position change that would require over 80 mph (device error)" },
+          { title: "Data Gap", text: "No signal for more than 5 minutes (device error)" },
+        ],
+      },
+      {
+        kind: "matrix",
+        heading: "Vendor Segmentation",
+        caption: "Vendors are placed by GPS connection health and route execution, and each segment gets a different corrective action. Conceptual view; vendor data not shown.",
+        x: { label: "GPS Connection Health", low: "Low", high: "High" },
+        y: { label: "Route Execution", low: "Low", high: "High" },
+        quadrants: [
+          { title: "Unconfident Success", text: "Routes get done, but the data can't prove it" },
+          { title: "Operational Excellence", text: "Reliable tracking and execution: the benchmark" },
+          { title: "Critical Failure", text: "Visibility gaps and underperformance" },
+          { title: "Behavioral Risk", text: "Fully visible, but drivers deviate from the plan", highlight: true },
+        ],
+      },
     ],
     results: [
       "Showed raw GPS data overstated stop completion, resetting the client's performance baseline",
@@ -194,7 +349,7 @@ export const projects: Project[] = [
     role: "Public data: Santander Customer Satisfaction (Kaggle)",
     metric: { value: "3.7x", label: "lift in the top-risk 20%" },
     metrics: [
-      { value: "0.84", label: "ROC-AUC, stable across 5-fold cross-validation" },
+      { value: "0.84", label: "ROC-AUC, stable across 5-Fold Cross-Validation" },
       { value: "3.7x", label: "lift in the top-risk 20% of customers" },
     ],
     summary:
@@ -205,12 +360,30 @@ export const projects: Project[] = [
     approach: [],
     steps: [
       { title: "Clean the features", text: "Dropped constant and duplicate columns (369 to 306) and tested row-level engineered features" },
-      { title: "Compare model families", text: "Benchmarked logistic regression, random forest, XGBoost, and a neural network on ROC-AUC for the 96/4 class imbalance" },
-      { title: "Tune and validate", text: "Tuned XGBoost with randomized search and confirmed stability with a 5-fold cross-validation ensemble" },
+      { title: "Compare model families", text: "Benchmarked Logistic Regression, Random Forest, XGBoost, and a Neural Network on ROC-AUC for the 96/4 class imbalance" },
+      { title: "Tune and validate", text: "Tuned XGBoost with Randomized Search and confirmed stability with a 5-Fold Cross-Validation ensemble" },
       { title: "Turn scores into action", text: "Set a risk threshold for the top 20% of customers and designed a 3-tier intervention plan" },
     ],
+    charts: [
+      {
+        kind: "bars",
+        heading: "Model Comparison",
+        caption: "Validation ROC-AUC by model on the cleaned feature set. 0.5 is a random guess; higher means better at ranking dissatisfied customers first.",
+        baseline: 0.5,
+        min: 0.5,
+        max: 0.9,
+        step: 0.1,
+        axisLabel: "ROC-AUC",
+        rows: [
+          { label: "Tuned XGBoost (5-Fold)", value: 0.8407, highlight: true },
+          { label: "Deep Neural Network", value: 0.8203 },
+          { label: "Logistic Regression", value: 0.7885 },
+          { label: "Random Forest", value: 0.7439 },
+        ],
+      },
+    ],
     results: [
-      "Reached 0.84 ROC-AUC, outperforming logistic regression (0.79) and random forest (0.74)",
+      "Reached 0.84 ROC-AUC, outperforming Logistic Regression (0.79) and Random Forest (0.74)",
       "Captured 74% of churners in the top-risk 20% of customers (3.7x lift), focusing retention outreach on the highest-risk accounts",
       "Identified balance drops, age, and inactive products as the strongest risk signals, and proposed tiered outreach from personal calls to automated offers",
     ],
@@ -236,8 +409,23 @@ export const projects: Project[] = [
     steps: [
       { title: "Score semantic repetition", text: "Embedded content descriptions and scored how repetitive each user's weekly feed was versus prior weeks" },
       { title: "Classify reviews with Claude", text: "Turned free-text reviews into complaint categories, benchmarked against a keyword baseline" },
-      { title: "Test causality twice", text: "Ran two independent difference-in-differences tests, one on behavior logs and one on reviews" },
+      { title: "Test causality twice", text: "Ran two independent Difference-in-Differences tests, one on behavior logs and one on reviews" },
       { title: "Build a chat copilot", text: "Wrapped the pipeline in a Streamlit chat app where Claude picks the analysis and explains results" },
+    ],
+    charts: [
+      {
+        kind: "slope",
+        heading: "Policy Impact on Fatigue",
+        caption: "Average fatigue score before and after the week-8 policy change, on synthetic data. The Difference-in-Differences estimate nets out the small rise in the control group.",
+        before: "Before Change",
+        after: "After Change",
+        yLabel: "Average Fatigue Score",
+        groups: [
+          { label: "Treatment", before: 0.45, after: 0.82, highlight: true },
+          { label: "Control", before: 0.46, after: 0.5 },
+        ],
+        note: "DiD Effect: +0.33",
+      },
     ],
     results: [
       "Tied the policy change to a +0.33 rise in fatigue (p < 0.001), independently confirmed by a +31.7 pp jump in LLM-classified complaints",
@@ -254,7 +442,7 @@ export const projects: Project[] = [
     role: "Public data: Last.fm 360K",
     metric: { value: "73%", label: "higher error for new users" },
     metrics: [
-      { value: "24%", label: "lower prediction error with neural CF vs. matrix factorization" },
+      { value: "24%", label: "lower prediction error with Neural CF vs. Matrix Factorization" },
       { value: "73%", label: "higher error for new users than power users" },
     ],
     summary:
@@ -265,12 +453,31 @@ export const projects: Project[] = [
     approach: [],
     steps: [
       { title: "Prepare implicit feedback", text: "Log-transformed and scaled play counts, and encoded 269K users and 50K artists for embedding models" },
-      { title: "Benchmark two models", text: "Built matrix factorization and neural collaborative filtering in TensorFlow and compared RMSE and MAE" },
+      { title: "Benchmark two models", text: "Built Matrix Factorization and Neural Collaborative Filtering in TensorFlow and compared RMSE and MAE" },
       { title: "Segment by activity", text: "Split test users into 4 tiers (new, light, average, power) by their listening history" },
       { title: "Translate to product", text: "Turned the error gap between tiers into an onboarding recommendation for new users" },
     ],
+    charts: [
+      {
+        kind: "bars",
+        heading: "Error by User Segment",
+        caption: "Neural CF test RMSE by user segment (lower is better). New users have no listening history for the model to learn from.",
+        baseline: 0,
+        min: 0,
+        max: 0.16,
+        step: 0.04,
+        decimals: 3,
+        axisLabel: "RMSE",
+        rows: [
+          { label: "Power Users", value: 0.0786 },
+          { label: "Average Users", value: 0.0826 },
+          { label: "Light Users", value: 0.092 },
+          { label: "New Users", value: 0.1358, highlight: true },
+        ],
+      },
+    ],
     results: [
-      "Neural CF cut prediction error 24% vs. matrix factorization (RMSE 0.106 vs. 0.138) by capturing non-linear user–artist patterns",
+      "Neural CF cut prediction error 24% vs. Matrix Factorization (RMSE 0.106 vs. 0.138) by capturing non-linear user–artist patterns",
       "Found new users saw 73% higher error than power users (RMSE 0.136 vs. 0.079), and they made up a third of test interactions",
       "Proposed a guided onboarding flow (pick a few favorite artists or genres) with a content-based fallback until users build enough history",
     ],
@@ -295,9 +502,53 @@ export const projects: Project[] = [
     approach: [],
     steps: [
       { title: "Aggregate and transform", text: "Aggregated 3M store-product records into 1.7K days of total sales and log-transformed the series" },
-      { title: "Diagnose the series", text: "Confirmed stationarity with an ADF test and read the weekly cycle from ACF, PACF, and EACF" },
-      { title: "Select the model", text: "Compared seasonal ARIMA candidates by AIC and chose ARIMA(1,0,1)(0,1,1) with a 7-day season" },
+      { title: "Diagnose the series", text: "Confirmed stationarity with an ADF Test and read the weekly cycle from ACF, PACF, and EACF" },
+      { title: "Select the model", text: "Compared Seasonal ARIMA candidates by AIC and chose ARIMA(1,0,1)(0,1,1) with a 7-day season" },
       { title: "Benchmark against ML", text: "Built a lag-feature XGBoost model and compared both on a 10-day holdout" },
+    ],
+    charts: [
+      {
+        kind: "forecast",
+        heading: "Holdout Forecast",
+        caption: "Total daily unit sales across all stores: the last three training weeks, then the 10-day holdout. Actual sales stayed inside the 95% band, so a promotion that pushes sales above it signals real lift.",
+        yLabel: "Daily Unit Sales (M)",
+        scale: 1000000,
+        history: [
+          { date: "07-16", value: 1100804 },
+          { date: "07-17", value: 818326 },
+          { date: "07-18", value: 730134 },
+          { date: "07-19", value: 767979 },
+          { date: "07-20", value: 688288 },
+          { date: "07-21", value: 782418 },
+          { date: "07-22", value: 932902 },
+          { date: "07-23", value: 1024289 },
+          { date: "07-24", value: 816564 },
+          { date: "07-25", value: 713582 },
+          { date: "07-26", value: 740653 },
+          { date: "07-27", value: 659850 },
+          { date: "07-28", value: 835100 },
+          { date: "07-29", value: 1032311 },
+          { date: "07-30", value: 1123752 },
+          { date: "07-31", value: 885857 },
+          { date: "08-01", value: 988528 },
+          { date: "08-02", value: 964712 },
+          { date: "08-03", value: 728068 },
+          { date: "08-04", value: 827776 },
+          { date: "08-05", value: 965694 },
+        ],
+        holdout: [
+          { date: "08-06", actual: 1049559, fc: 1125945, lo: 649624, hi: 1951517 },
+          { date: "08-07", actual: 797465, fc: 856445, lo: 492473, hi: 1489419 },
+          { date: "08-08", actual: 717766, fc: 796552, lo: 456698, hi: 1389308 },
+          { date: "08-09", actual: 734140, fc: 824790, lo: 471693, hi: 1442206 },
+          { date: "08-10", actual: 651387, fc: 689496, lo: 393454, hi: 1208286 },
+          { date: "08-11", actual: 826374, fc: 824787, lo: 469759, hi: 1448132 },
+          { date: "08-12", actual: 792631, fc: 1036897, lo: 589589, hi: 1823569 },
+          { date: "08-13", actual: 865640, fc: 1116793, lo: 628951, hi: 1983026 },
+          { date: "08-14", actual: 760922, fc: 849944, lo: 477833, hi: 1511833 },
+          { date: "08-15", actual: 762662, fc: 790905, lo: 443968, hi: 1408954 },
+        ],
+      },
     ],
     results: [
       "Cut holdout RMSE 28% vs. XGBoost (0.137 vs. 0.190 on the log scale), with every model coefficient significant",
@@ -329,6 +580,17 @@ export const projects: Project[] = [
       { title: "Find a predictable segment", text: "Focused on conferences, announced months ahead, and treated same-destination, same-date trips as one event" },
       { title: "Quantify fragmentation", text: "Showed groups arriving at the same conference booked ground transport separately, up to 40+ vehicles per group" },
       { title: "Redesign the process", text: "Proposed approval-first booking, manager-led bulk bookings, and automated co-traveler alerts" },
+    ],
+    charts: [
+      {
+        kind: "process",
+        heading: "Process Redesign",
+        caption: "Moving approval before booking lets managers see who is heading to the same conference and coordinate ground travel.",
+        lanes: [
+          { label: "Before", steps: ["Employee books own ride", "Manager approves afterward", "Colleagues ride separately"] },
+          { label: "After", steps: ["Employee requests approval", "Manager bulk-books in one hub", "Co-travelers flagged automatically", "Shared ground transport"], highlight: true },
+        ],
+      },
     ],
     results: [
       "Identified 27,303 conference trips with overlapping travel plans, ready for coordination",
