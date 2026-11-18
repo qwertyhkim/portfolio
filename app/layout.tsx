@@ -9,8 +9,9 @@ import { profile } from "@/lib/content";
 export const metadata: Metadata = {
   title: `${profile.name} | ${profile.role}`,
   description: profile.intro,
+  // Link previews (iMessage, LinkedIn, Slack) read these tags
   openGraph: {
-    title: `${profile.name} | ${profile.role}`,
+    title: profile.name,
     description: profile.headline.replace(/\*/g, ""),
     type: "website",
   },
